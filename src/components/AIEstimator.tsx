@@ -20,7 +20,16 @@ export default function AIEstimator() {
     setShowConsiderations(false);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      // Safely access process.env for AI Studio, fallback to import.meta.env for Vercel
+      const apiKey = (typeof process !== 'undefined' && process?.env?.GEMINI_API_KEY) 
+        ? process.env.GEMINI_API_KEY 
+        : import.meta.env.VITE_GEMINI_API_KEY;
+
+      if (!apiKey) {
+        throw new Error("API Key missing. If on Vercel, please provide VITE_GEMINI_API_KEY in environment variables.");
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
